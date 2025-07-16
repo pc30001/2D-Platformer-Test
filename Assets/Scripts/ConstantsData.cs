@@ -7,6 +7,7 @@ public static class ConstantsData
     public static class AnimatorParameters
     {
         public static readonly int SpeedX = Animator.StringToHash(nameof(SpeedX));
+        public static readonly int SpeedY = Animator.StringToHash(nameof(SpeedY));
     }
 
     public static class Tags

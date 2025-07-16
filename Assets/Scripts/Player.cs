@@ -19,12 +19,19 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
-        _animator.SetSpeedX(_inputReader.Direction);
+        float horizontal = _inputReader.Direction;
+        float vertical = _inputReader.VerticalDirection;
 
-        if (_inputReader.Direction != 0)
-            _mover.Move(_inputReader.Direction);
+        _animator.SetSpeedX(horizontal);
+
+        if (horizontal != 0 || vertical != 0)
+        {
+            _mover.Move(horizontal, vertical);
+        }
 
         if (_inputReader.GetIsJump() && _groudDetector.IsGround)
+        {
             _mover.Jump();
+        }
     }
 }
