@@ -13,6 +13,6 @@ public class PlayerAnimator : MonoBehaviour
 
     public void SetSpeedY(float speedY)
     {
-        _animator.SetFloat(ConstantsData.AnimatorParameters.SpeedY, Mathf.Abs(speedY));
+        _animator.SetFloat(ConstantsData.AnimatorParameters.SpeedY, speedY);
     }
 }
