@@ -8,7 +8,7 @@ public class PlayerAnimator : MonoBehaviour
 
     public void SetSpeedX(float speedX)
     {
-        _animator.SetFloat(ConstantsData.AnimatorParameters.SpeedX, speedX);
+       // _animator.SetFloat(ConstantsData.AnimatorParameters.SpeedX, speedX);
     }
 
     public void SetSpeedY(float speedY)
