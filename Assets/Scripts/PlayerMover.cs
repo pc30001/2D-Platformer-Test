@@ -32,7 +32,7 @@ public class PlayerMover : MonoBehaviour
     public void Jump()
     {
         _rigibody.AddForce(new Vector2(0, _jumpForce));
-       // _directiony = Input.GetAxis(VerticalAxis);
+        _directiony = Input.GetAxis(VerticalAxis);
     }
 
     public void Move(float directionX, float directionY)
