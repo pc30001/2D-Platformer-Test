@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+[RequireComponent(typeof(Rigidbody2D))]
 
 public class Enemy : MonoBehaviour
 {
@@ -7,9 +8,11 @@ public class Enemy : MonoBehaviour
     [SerializeField] private float _speedX = 1;
     [SerializeField] private float _maxSqrDistance = 0.01f;
     [SerializeField] private float _waitTime = 2f;
+    [SerializeField] private Vector2 _seeAreaSize;
+    [SerializeField] private LayerMask _targetLayer;
 
     private Rigidbody2D _rigibody;
-    private bool _isTurnRight = true;
+    private bool _isTurnRight = false;
     private int _wayPointIndex;
     private Transform _target;
     private bool _isWaiting = true;
@@ -24,8 +27,15 @@ public class Enemy : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (TrySeeTarget(out Transform target))
+        {
+            Move(target);
+            return;
+        }
+
+
         if (_isWaiting == false)
-            Move();
+            Move(_target);
 
         if (IsTargetReached() && _isWaiting == false)
         {
@@ -40,11 +50,39 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    private void Move()
+    private bool TrySeeTarget(out Transform target)
     {
-        Vector2 newPosotion = Vector2.MoveTowards(transform.position, _target.position, _speedX * Time.fixedDeltaTime);
-        _rigibody.MovePosition(newPosotion);
+        target = null;
+        Collider2D hit = Physics2D.OverlapBox(GetLookAreaOrigin(), _seeAreaSize, 0, _targetLayer);
 
+        if (hit != null)
+        {
+
+            Vector2 direction = (hit.transform.position - transform.position).normalized;
+            RaycastHit2D hit2D = Physics2D.Raycast(transform.position, direction, _seeAreaSize.x, ~(1 << gameObject.layer));
+
+            if (hit2D.collider != null)
+            {
+                if (hit2D.collider == hit)
+                {
+                    Debug.DrawLine(transform.position, hit2D.point, Color.red);
+                    target = hit2D.transform;
+                    return true;
+                }
+
+                else
+                {
+                    Debug.DrawLine(transform.position, hit2D.point, Color.white);
+                }
+            }
+        }
+        return false;
+    }
+
+    private void Move(Transform target)
+    {
+        Vector2 newPosotion = Vector2.MoveTowards(transform.position, target.position, _speedX * Time.fixedDeltaTime);
+        _rigibody.MovePosition(newPosotion);
     }
 
     private bool IsTargetReached()
@@ -59,19 +97,25 @@ public class Enemy : MonoBehaviour
         _wayPointIndex = ++_wayPointIndex % _wayPoints.Length;
         _target = _wayPoints[_wayPointIndex].transform;
 
-        // Поворот персонажа
-        if ((transform.position.x < _target.position.x && _isTurnRight == false) 
+        if ((transform.position.x < _target.position.x && _isTurnRight == false)
             || (transform.position.x > _target.position.x && _isTurnRight))
         {
-            Flip();
+            _isTurnRight = !_isTurnRight;
+            transform.Flip();
         }
     }
 
-    private void Flip()
+    private Vector2 GetLookAreaOrigin()
     {
-        _isTurnRight = !_isTurnRight;
-        Vector3 scale = transform.localScale;
-        scale.x *= -1;
-        transform.localScale = scale;
+        float halfCoefficient = 2;
+        int directionCoefficient = _isTurnRight ? 1 : -1;
+        float originX = transform.position.x + _seeAreaSize.x / halfCoefficient * directionCoefficient;
+        return new Vector2(originX, transform.position.y);
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireCube(GetLookAreaOrigin(), _seeAreaSize);
     }
 }
